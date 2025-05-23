@@ -13,12 +13,18 @@ ALLOWED_PHONE = re.sub(r'\D', '', os.environ.get("ALLOWED_PHONE"))
 def webhook():
     data = request.json
 
-    # 🔍 Показываем весь JSON для анализа структуры
+    # Показываем весь JSON
     print("FULL JSON:")
     print(data)
 
-    sender = data.get('from', {}).get('phoneNumber')
-    message = data.get('text')
+    # Новый путь к номеру отправителя и сообщению
+    try:
+        message_data = data['data']['object']
+        sender = message_data.get('from')
+        message = message_data.get('body')
+    except Exception as e:
+        print(f"DEBUG: Parsing error: {e}")
+        return '', 200
 
     print(f"DEBUG: Raw sender: {sender}")
 
