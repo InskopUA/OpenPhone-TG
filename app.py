@@ -9,6 +9,10 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 ALLOWED_PHONE = re.sub(r'\D', '', os.environ.get("ALLOWED_PHONE"))
 
+@app.route('/')
+def index():
+    return '✅ Webhook сервис работает.'
+
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.json
@@ -24,12 +28,12 @@ def webhook():
         message = message_data.get('body')
     except Exception as e:
         print(f"DEBUG: Parsing error: {e}")
-        return '', 200
+        return 'Invalid payload', 200
 
     print(f"DEBUG: Raw sender: {sender}")
 
     if not sender or not message:
-        return '', 200
+        return 'Missing data', 200
 
     normalized_sender = re.sub(r'\D', '', sender)
     print(f"DEBUG: Normalized: {normalized_sender} vs ALLOWED: {ALLOWED_PHONE}")
@@ -38,7 +42,7 @@ def webhook():
     if normalized_sender == ALLOWED_PHONE:
         send_to_telegram(f"📩 SMS от {sender}:\n{message}")
 
-    return '', 200
+    return 'OK', 200
 
 def send_to_telegram(text):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
@@ -50,4 +54,3 @@ def send_to_telegram(text):
 
 if __name__ == '__main__':
     app.run()
-
